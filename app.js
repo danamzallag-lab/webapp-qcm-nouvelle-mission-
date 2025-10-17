@@ -266,20 +266,23 @@ function renderEvaluationQuestions(type) {
       inputEl.innerHTML = '<option value="">--Sélectionnez d\'abord un médicament--</option>';
       inputEl.disabled = true; // Désactivé par défaut
     }
-    // Recherche de corticoïde inhalé avec barre de recherche
+    // Recherche de corticoïde inhalé avec barre de recherche (SÉLECTION MULTIPLE)
     else if (item.type === "search_corticoide") {
       // Créer un conteneur pour la recherche
       const searchContainer = document.createElement('div');
       searchContainer.className = 'corticoide-search-container';
 
+      // Tableau pour stocker les sélections multiples
+      let selectedCorticoids = [];
+
       // Barre de recherche
       const searchInput = document.createElement('input');
       searchInput.type = "text";
       searchInput.id = item.id + '_search';
-      searchInput.placeholder = "Rechercher un corticoïde...";
+      searchInput.placeholder = "Rechercher un corticoïde (vous pouvez en ajouter plusieurs)...";
       searchInput.className = 'corticoide-search';
 
-      // Champ caché pour stocker la sélection
+      // Champ caché pour stocker toutes les sélections
       inputEl = document.createElement('input');
       inputEl.type = "hidden";
       inputEl.id = item.id;
@@ -291,10 +294,10 @@ function renderEvaluationQuestions(type) {
       resultsList.className = 'corticoide-results';
       resultsList.style.display = 'none';
 
-      // Affichage de la sélection
+      // Affichage des sélections
       const selectionDisplay = document.createElement('div');
       selectionDisplay.id = item.id + '_display';
-      selectionDisplay.className = 'corticoide-selection';
+      selectionDisplay.className = 'corticoide-selection-multiple';
 
       searchContainer.appendChild(searchInput);
       searchContainer.appendChild(resultsList);
@@ -302,6 +305,33 @@ function renderEvaluationQuestions(type) {
       searchContainer.appendChild(inputEl);
 
       container.appendChild(searchContainer);
+
+      // Fonction pour mettre à jour l'affichage des sélections
+      const updateDisplay = () => {
+        inputEl.value = JSON.stringify(selectedCorticoids);
+
+        if (selectedCorticoids.length === 0) {
+          selectionDisplay.innerHTML = '';
+          return;
+        }
+
+        selectionDisplay.innerHTML = selectedCorticoids.map((med, index) => `
+          <div class="selected-corticoide">
+            <strong>${med.nom}</strong> (${med.dci})<br>
+            <small>${med.dispositif} - Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}</small>
+            <button type="button" class="remove-selection" data-index="${index}">×</button>
+          </div>
+        `).join('');
+
+        // Ajouter les événements de suppression
+        selectionDisplay.querySelectorAll('.remove-selection').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = parseInt(btn.getAttribute('data-index'));
+            selectedCorticoids.splice(index, 1);
+            updateDisplay();
+          });
+        });
+      };
 
       // Fonction de recherche
       searchInput.addEventListener('input', () => {
@@ -311,11 +341,15 @@ function renderEvaluationQuestions(type) {
           return;
         }
 
-        const filtered = item.medicaments.filter(med =>
-          med.nom.toLowerCase().includes(searchTerm) ||
-          med.dci.toLowerCase().includes(searchTerm) ||
-          med.dispositif.toLowerCase().includes(searchTerm)
-        );
+        const filtered = item.medicaments.filter(med => {
+          // Ne pas afficher les médicaments déjà sélectionnés
+          const alreadySelected = selectedCorticoids.some(selected => selected.nom === med.nom);
+          if (alreadySelected) return false;
+
+          return med.nom.toLowerCase().includes(searchTerm) ||
+                 med.dci.toLowerCase().includes(searchTerm) ||
+                 med.dispositif.toLowerCase().includes(searchTerm);
+        });
 
         if (filtered.length > 0) {
           resultsList.innerHTML = '';
@@ -329,28 +363,18 @@ function renderEvaluationQuestions(type) {
               <small>${med.dispositif} | Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}</small>
             `;
             resultItem.addEventListener('click', () => {
-              const selectedValue = JSON.stringify(med);
-              inputEl.value = selectedValue;
-              selectionDisplay.innerHTML = `
-                <div class="selected-corticoide">
-                  <strong>${med.nom}</strong> (${med.dci})<br>
-                  <small>${med.dispositif} - Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}</small>
-                  <button type="button" class="remove-selection" style="margin-left:10px;">×</button>
-                </div>
-              `;
+              // Ajouter à la liste des sélections
+              selectedCorticoids.push(med);
+              updateDisplay();
+
               searchInput.value = '';
               resultsList.style.display = 'none';
-
-              // Bouton pour supprimer la sélection
-              selectionDisplay.querySelector('.remove-selection').addEventListener('click', () => {
-                inputEl.value = '';
-                selectionDisplay.innerHTML = '';
-              });
             });
             resultsList.appendChild(resultItem);
           });
         } else {
-          resultsList.style.display = 'none';
+          resultsList.innerHTML = '<div class="corticoide-result-item" style="color:#7f8c8d; font-style:italic;">Aucun résultat ou déjà sélectionné</div>';
+          resultsList.style.display = 'block';
         }
       });
 

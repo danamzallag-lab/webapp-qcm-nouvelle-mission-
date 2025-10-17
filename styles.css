@@ -437,10 +437,18 @@ select:valid:not(:placeholder-shown) {
   margin-top: 15px;
 }
 
+/* Sélection multiple de corticoïdes */
+.corticoide-selection-multiple {
+  margin-top: 15px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
 .selected-corticoide {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 15px;
+  padding: 15px 50px 15px 15px;
   border-radius: 8px;
   position: relative;
   animation: slideIn 0.3s ease-out;
