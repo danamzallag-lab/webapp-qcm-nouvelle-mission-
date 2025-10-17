@@ -1,5 +1,60 @@
 # Changelog - Application Entretiens Pharmaceutiques
 
+## Version 1.2.0 - 17 octobre 2025
+
+### ✨ Nouvelles fonctionnalités majeures
+
+#### 🫁 Bronchodilatateurs de crise
+Ajout de 4 bronchodilatateurs de crise pour l'asthme :
+- **Ventoline** (Salbutamol) - MDI aérosol doseur : 100 µg
+- **Airomir Autohaler** (Salbutamol) - MDI auto-déclenché : 100 µg
+- **Bricanyl Turbuhaler** (Terbutaline) - DPI Turbuhaler : 500 µg
+- **Atrovent** (Ipratropium) - MDI aérosol doseur : 20 µg
+
+#### 💊 Associations fixes (CSI + BDLA)
+Ajout de traitements de fond associés :
+- **Symbicort Turbuhaler** (Budésonide + Formotérol) - DPI Turbuhaler : 100/6, 200/6, 400/12 µg
+- **Innovair** (Béclométasone + Formotérol) - MDI : 100/6, 200/6 µg
+
+#### ➕ Médicament personnalisé
+**Nouvelle fonctionnalité majeure** : Possibilité d'ajouter un médicament non présent dans la liste
+- Bouton "➕ Ajouter un autre médicament" dans les résultats de recherche
+- Formulaire guidé pour saisir :
+  - Nom du médicament
+  - DCI (optionnel)
+  - Type de dispositif (optionnel)
+  - Dosage(s) (optionnel)
+- Badge "✨ Personnalisé" sur les médicaments ajoutés manuellement
+- Stockage au format JSON identique aux médicaments prédéfinis
+
+#### 🔄 Nouveau type de question : `search_medicament`
+- Remplace `search_corticoide` pour être générique
+- Fonctionne avec tous types de médicaments
+- Support de la sélection multiple
+- Support du médicament personnalisé via `allowCustom: true`
+- Recherche multi-critères (nom, DCI, dispositif)
+
+### 🔧 Améliorations techniques
+
+#### Dans `app.js` :
+- Ligne 39-45 : Ajout de `bronchodilateursCrise` array
+- Ligne 35-36 : Ajout de Symbicort et Innovair dans `corticoidesInhales`
+- Ligne 69 : Question traitement de fond → `type: "search_medicament"` avec `allowCustom: true`
+- Ligne 71 : Question traitement de crise → `type: "search_medicament"` avec `allowCustom: true`
+- Ligne 281-438 : Implémentation complète du type `search_medicament`
+  - Fonction `addCustomMedicament()` pour ajout manuel
+  - Affichage conditionnel du bouton "Autre médicament"
+  - Gestion des médicaments personnalisés dans l'affichage
+
+### 🎨 Améliorations visuelles
+
+- Badge "✨ Personnalisé" en vert pour les médicaments manuels
+- Bouton "Ajouter un autre médicament" avec bordure verte
+- Affichage harmonisé pour tous types de médicaments
+- Gestion des champs optionnels (DCI, dispositif, dosages peuvent être vides)
+
+---
+
 ## Version 1.1.0 - 17 octobre 2025
 
 ### ✨ Nouvelles fonctionnalités

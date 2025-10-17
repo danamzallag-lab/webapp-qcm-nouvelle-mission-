@@ -21,7 +21,7 @@ const medicamentsAVK = {
   "Previscan (Fluindione)": ["20 mg"]
 };
 
-// Base de données des corticoïdes inhalés avec dosages
+// Base de données des corticoïdes inhalés avec dosages (TRAITEMENT DE FOND)
 const corticoidesInhales = [
   { nom: "Flixotide", dci: "Fluticasone propionate", dispositif: "MDI (Evohaler)", dosages: ["50", "125", "250"], source: "VIDAL" },
   { nom: "Flixotide Diskus", dci: "Fluticasone propionate", dispositif: "DPI (Diskus)", dosages: ["100", "250", "500"], source: "VIDAL" },
@@ -30,7 +30,18 @@ const corticoidesInhales = [
   { nom: "Asmanex Twisthaler", dci: "Furoate de mométasone", dispositif: "DPI (Twisthaler)", dosages: ["200", "400"], source: "Base de Données Médicaments" },
   { nom: "Bécotide", dci: "Béclométasone dipropionate", dispositif: "MDI", dosages: ["250"], source: "Base de Données Médicaments" },
   { nom: "Beclometasone Teva", dci: "Béclométasone dipropionate", dispositif: "MDI", dosages: ["50", "250"], source: "Base de Données Médicaments" },
-  { nom: "QVAR Autohaler", dci: "Béclométasone dipropionate", dispositif: "MDI (autodéclenché)", dosages: ["100"], source: "Base de Données Médicaments" }
+  { nom: "QVAR Autohaler", dci: "Béclométasone dipropionate", dispositif: "MDI (autodéclenché)", dosages: ["100"], source: "Base de Données Médicaments" },
+  // Associations fixes (Corticoïde + Bronchodilatateur longue durée)
+  { nom: "Symbicort Turbuhaler", dci: "Budésonide + Formotérol", dispositif: "DPI (Turbuhaler)", dosages: ["100/6", "200/6", "400/12"], source: "Association fixe CSI+BDLA" },
+  { nom: "Innovair", dci: "Béclométasone + Formotérol", dispositif: "MDI", dosages: ["100/6", "200/6"], source: "Association fixe CSI+BDLA" }
+];
+
+// Base de données des bronchodilatateurs de crise
+const bronchodilateursCrise = [
+  { nom: "Ventoline", dci: "Salbutamol", dispositif: "MDI (aérosol doseur)", dosages: ["100"], source: "Bronchodilatateur de crise" },
+  { nom: "Airomir Autohaler", dci: "Salbutamol", dispositif: "MDI auto-déclenché", dosages: ["100"], source: "Bronchodilatateur de crise" },
+  { nom: "Bricanyl Turbuhaler", dci: "Terbutaline", dispositif: "DPI (Turbuhaler)", dosages: ["500"], source: "Bronchodilatateur de crise" },
+  { nom: "Atrovent", dci: "Ipratropium", dispositif: "MDI (aérosol doseur)", dosages: ["20"], source: "Bronchodilatateur de crise" }
 ];
 
 // Définition des questions d'évaluation pour chaque type d'entretien
@@ -55,9 +66,9 @@ const evaluationQuestions = {
     { q: "Quel type d'asthme avez-vous ?", type: "text", id: "q_asthme_typeAsthme" },
     { q: "Depuis combien de temps êtes-vous asthmatique ?", type: "text", id: "q_asthme_duree" },
     { q: "Avez-vous un traitement de fond ?", type: "select", options: ["Oui", "Non"], id: "q_asthme_traitementFond" },
-    { q: "Si oui, quel(s) traitement(s) de fond ?", type: "search_corticoide", medicaments: corticoidesInhales, id: "q_asthme_quelTraitementFond" },
+    { q: "Si oui, quel(s) traitement(s) de fond ?", type: "search_medicament", medicaments: corticoidesInhales, id: "q_asthme_quelTraitementFond", allowCustom: true },
     { q: "Avez-vous un traitement de crise ?", type: "select", options: ["Oui", "Non"], id: "q_asthme_traitementCrise" },
-    { q: "Si oui, lequel ?", type: "text", id: "q_asthme_quelTraitementCrise" },
+    { q: "Si oui, lequel ?", type: "search_medicament", medicaments: bronchodilateursCrise, id: "q_asthme_quelTraitementCrise", allowCustom: true },
     { q: "Fréquence des crises d'asthme", type: "text", id: "q_asthme_frequenceCrises" }
   ]
 };
@@ -265,6 +276,165 @@ function renderEvaluationQuestions(type) {
       inputEl.name = item.id;
       inputEl.innerHTML = '<option value="">--Sélectionnez d\'abord un médicament--</option>';
       inputEl.disabled = true; // Désactivé par défaut
+    }
+    // Recherche de médicament avec barre de recherche (SÉLECTION MULTIPLE + MÉDICAMENT PERSONNALISÉ)
+    else if (item.type === "search_medicament") {
+      // Créer un conteneur pour la recherche
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'corticoide-search-container';
+
+      // Tableau pour stocker les sélections multiples
+      let selectedMedicaments = [];
+
+      // Barre de recherche
+      const searchInput = document.createElement('input');
+      searchInput.type = "text";
+      searchInput.id = item.id + '_search';
+      searchInput.placeholder = "Rechercher un médicament (vous pouvez en ajouter plusieurs)...";
+      searchInput.className = 'corticoide-search';
+
+      // Champ caché pour stocker toutes les sélections
+      inputEl = document.createElement('input');
+      inputEl.type = "hidden";
+      inputEl.id = item.id;
+      inputEl.name = item.id;
+
+      // Liste déroulante des résultats
+      const resultsList = document.createElement('div');
+      resultsList.id = item.id + '_results';
+      resultsList.className = 'corticoide-results';
+      resultsList.style.display = 'none';
+
+      // Affichage des sélections
+      const selectionDisplay = document.createElement('div');
+      selectionDisplay.id = item.id + '_display';
+      selectionDisplay.className = 'corticoide-selection-multiple';
+
+      searchContainer.appendChild(searchInput);
+      searchContainer.appendChild(resultsList);
+      searchContainer.appendChild(selectionDisplay);
+      searchContainer.appendChild(inputEl);
+
+      container.appendChild(searchContainer);
+
+      // Fonction pour mettre à jour l'affichage des sélections
+      const updateDisplay = () => {
+        inputEl.value = JSON.stringify(selectedMedicaments);
+
+        if (selectedMedicaments.length === 0) {
+          selectionDisplay.innerHTML = '';
+          return;
+        }
+
+        selectionDisplay.innerHTML = selectedMedicaments.map((med, index) => `
+          <div class="selected-corticoide">
+            <strong>${med.nom}</strong> ${med.dci ? `(${med.dci})` : ''}<br>
+            <small>${med.dispositif || ''} ${med.dosages ? `- Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}` : ''}</small>
+            ${med.source === 'Médicament personnalisé' ? '<span style="color:#4caf50; font-size:0.8em;">✨ Personnalisé</span>' : ''}
+            <button type="button" class="remove-selection" data-index="${index}">×</button>
+          </div>
+        `).join('');
+
+        // Ajouter les événements de suppression
+        selectionDisplay.querySelectorAll('.remove-selection').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = parseInt(btn.getAttribute('data-index'));
+            selectedMedicaments.splice(index, 1);
+            updateDisplay();
+          });
+        });
+      };
+
+      // Fonction pour ajouter un médicament personnalisé
+      const addCustomMedicament = () => {
+        const customName = prompt("Nom du médicament :");
+        if (!customName || !customName.trim()) return;
+
+        const customDCI = prompt("DCI (Dénomination Commune Internationale) - optionnel :");
+        const customDispositif = prompt("Type de dispositif (ex: MDI, DPI, Turbuhaler) - optionnel :");
+        const customDosage = prompt("Dosage(s) en µg (séparer par des virgules si plusieurs) - optionnel :");
+
+        const customMed = {
+          nom: customName.trim(),
+          dci: customDCI?.trim() || "",
+          dispositif: customDispositif?.trim() || "",
+          dosages: customDosage ? customDosage.split(",").map(d => d.trim()) : [],
+          source: "Médicament personnalisé"
+        };
+
+        selectedMedicaments.push(customMed);
+        updateDisplay();
+        searchInput.value = '';
+        resultsList.style.display = 'none';
+      };
+
+      // Fonction de recherche
+      searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm.length < 2) {
+          resultsList.style.display = 'none';
+          return;
+        }
+
+        const medicamentsList = item.medicaments || [];
+        const filtered = medicamentsList.filter(med => {
+          // Ne pas afficher les médicaments déjà sélectionnés
+          const alreadySelected = selectedMedicaments.some(selected => selected.nom === med.nom);
+          if (alreadySelected) return false;
+
+          return med.nom.toLowerCase().includes(searchTerm) ||
+                 (med.dci && med.dci.toLowerCase().includes(searchTerm)) ||
+                 (med.dispositif && med.dispositif.toLowerCase().includes(searchTerm));
+        });
+
+        if (filtered.length > 0 || item.allowCustom) {
+          resultsList.innerHTML = '';
+          resultsList.style.display = 'block';
+
+          // Afficher les résultats de recherche
+          filtered.forEach(med => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'corticoide-result-item';
+            resultItem.innerHTML = `
+              <strong>${med.nom}</strong> ${med.dci ? `- ${med.dci}` : ''}<br>
+              <small>${med.dispositif || ''} ${med.dosages ? `| Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}` : ''}</small>
+            `;
+            resultItem.addEventListener('click', () => {
+              selectedMedicaments.push(med);
+              updateDisplay();
+              searchInput.value = '';
+              resultsList.style.display = 'none';
+            });
+            resultsList.appendChild(resultItem);
+          });
+
+          // Ajouter l'option "Autre médicament" si allowCustom est activé
+          if (item.allowCustom) {
+            const customItem = document.createElement('div');
+            customItem.className = 'corticoide-result-item';
+            customItem.style.backgroundColor = '#e8f5e9';
+            customItem.style.borderLeft = '3px solid #4caf50';
+            customItem.innerHTML = `
+              <strong>➕ Ajouter un autre médicament</strong><br>
+              <small style="color:#2e7d32;">Médicament non trouvé dans la liste</small>
+            `;
+            customItem.addEventListener('click', addCustomMedicament);
+            resultsList.appendChild(customItem);
+          }
+        } else {
+          resultsList.innerHTML = '<div class="corticoide-result-item" style="color:#7f8c8d; font-style:italic;">Aucun résultat</div>';
+          resultsList.style.display = 'block';
+        }
+      });
+
+      // Cacher les résultats si on clique ailleurs
+      document.addEventListener('click', (e) => {
+        if (!searchContainer.contains(e.target)) {
+          resultsList.style.display = 'none';
+        }
+      });
+
+      return; // Pas besoin d'ajouter inputEl car déjà dans searchContainer
     }
     // Recherche de corticoïde inhalé avec barre de recherche (SÉLECTION MULTIPLE)
     else if (item.type === "search_corticoide") {
