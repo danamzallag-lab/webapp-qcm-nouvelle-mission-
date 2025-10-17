@@ -1,0 +1,10 @@
+# Documentation (pas nécessaire pour l'app en production)
+*.md
+LIRE_MOI_DABORD.txt
+
+# Git
+.git
+.gitignore
+
+# Dev files
+LANCER.bat
