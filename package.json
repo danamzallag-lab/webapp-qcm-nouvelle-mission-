@@ -1,0 +1,20 @@
+{
+  "name": "entretiens-pharmaceutiques-app",
+  "version": "1.0.0",
+  "description": "Application de gestion des entretiens pharmaceutiques à distance",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000 || open index.html",
+    "dev": "python -m http.server 8000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "pharmacie",
+    "entretiens",
+    "AOD",
+    "AVK",
+    "asthme"
+  ],
+  "author": "InnovaPharm Formation",
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entretien Pharmaceutique à Distance</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Entretien Pharmaceutique à Distance</h1>
+
+  <!-- Étape 1 : Infos patient + type d'entretien -->
+  <div class="step active" id="step-1">
+    <h2>1. Informations du patient et type d'entretien</h2>
+    <fieldset>
+      <legend>Informations du patient</legend>
+      <label for="nomPrenom">Nom et Prénom :</label>
+      <input type="text" id="nomPrenom" name="nomPrenom" required>
+
+      <label for="dateNaissance">Date de naissance :</label>
+      <input type="date" id="dateNaissance" name="dateNaissance" required>
+
+      <label for="numSecu">N° Sécurité Sociale :</label>
+      <input type="text" id="numSecu" name="numSecu">
+
+      <label for="adresse1">Adresse (ligne 1) :</label>
+      <input type="text" id="adresse1" name="adresse1">
+
+      <label for="adresse2">Adresse (ligne 2) :</label>
+      <input type="text" id="adresse2" name="adresse2">
+
+      <label for="codePostal">Code postal :</label>
+      <input type="text" id="codePostal" name="codePostal">
+
+      <label for="ville">Ville :</label>
+      <input type="text" id="ville" name="ville">
+
+      <label for="telephone">Téléphone :</label>
+      <input type="tel" id="telephone" name="telephone">
+
+      <label for="email">Email :</label>
+      <input type="email" id="email" name="email">
+    </fieldset>
+
+    <fieldset>
+      <legend>Type d'entretien</legend>
+      <label><input type="radio" name="typeEntretien" value="aod" required> Anticoagulant Oral Direct (AOD)</label>
+      <label><input type="radio" name="typeEntretien" value="avk" required> Anti-vitamine K (AVK)</label>
+      <label><input type="radio" name="typeEntretien" value="asthme" required> Asthme</label>
+    </fieldset>
+
+    <div class="buttons">
+      <button type="button" id="next-1" class="btn-primary">Suivant</button>
+    </div>
+  </div>
+
+  <!-- Étape 2 : Adhésion -->
+  <div class="step" id="step-2">
+    <h2>2. Adhésion au programme</h2>
+    <fieldset>
+      <label for="dejaParticipe">Avez-vous déjà participé à un entretien pharmaceutique ?</label>
+      <select id="dejaParticipe" name="dejaParticipe" required>
+        <option value="">--Sélectionnez--</option>
+        <option>Oui</option>
+        <option>Non</option>
+      </select>
+
+      <label for="accepteParticipation">Acceptez-vous de participer au programme d'accompagnement ?</label>
+      <select id="accepteParticipation" name="accepteParticipation" required>
+        <option value="">--Sélectionnez--</option>
+        <option>Oui</option>
+        <option>Non</option>
+      </select>
+
+      <label for="objectifs">Quels sont vos objectifs personnels ?</label>
+      <textarea id="objectifs" name="objectifs" rows="2" placeholder="Vos attentes..."></textarea>
+
+      <label for="nomPharmacie">Nom de la pharmacie :</label>
+      <input type="text" id="nomPharmacie" name="nomPharmacie">
+
+      <label for="adressePharmacie1">Adresse de la pharmacie (ligne 1) :</label>
+      <input type="text" id="adressePharmacie1" name="adressePharmacie1">
+
+      <label for="adressePharmacie2">Adresse de la pharmacie (ligne 2) :</label>
+      <input type="text" id="adressePharmacie2" name="adressePharmacie2">
+
+      <label for="dateEntretien">Date de l'entretien :</label>
+      <input type="date" id="dateEntretien" name="dateEntretien" required>
+
+      <label for="pharmacienReferent">Pharmacien référent :</label>
+      <input type="text" id="pharmacienReferent" name="pharmacienReferent">
+    </fieldset>
+
+    <div class="buttons">
+      <button type="button" id="prev-2" class="btn-secondary">Précédent</button>
+      <button type="button" id="next-2" class="btn-primary">Suivant</button>
+    </div>
+  </div>
+
+  <!-- Étape 3 : Questionnaire d'évaluation -->
+  <div class="step" id="step-3">
+    <h2>3. Questionnaire d'évaluation</h2>
+    <div id="evaluation-questions">
+      <!-- Les questions d'évaluation seront insérées ici dynamiquement -->
+    </div>
+    <div class="buttons">
+      <button type="button" id="prev-3" class="btn-secondary">Précédent</button>
+      <button type="button" id="next-3" class="btn-primary">Suivant</button>
+    </div>
+  </div>
+
+  <!-- Étape 4 : Choix des thématiques -->
+  <div class="step" id="step-4">
+    <h2>4. Sélection des thématiques</h2>
+    <p class="info-text">Veuillez sélectionner entre 2 et 4 thématiques à aborder lors de cet entretien :</p>
+    <div id="themes-options">
+      <!-- Les cases à cocher des thématiques seront générées ici -->
+    </div>
+    <div class="buttons">
+      <button type="button" id="prev-4" class="btn-secondary">Précédent</button>
+      <button type="button" id="next-4" class="btn-primary" disabled>Suivant</button>
+    </div>
+  </div>
+
+  <!-- Étape 5 : Questions par thématique -->
+  <div class="step" id="step-5">
+    <h2>5. Questions par thématique</h2>
+    <div id="thematique-questions">
+      <!-- Les questions des thématiques sélectionnées seront insérées ici dynamiquement -->
+    </div>
+    <div class="buttons">
+      <button type="button" id="prev-5" class="btn-secondary">Précédent</button>
+      <button type="button" id="next-5" class="btn-primary">Suivant</button>
+    </div>
+  </div>
+
+  <!-- Étape 6 : Synthèse de l'entretien -->
+  <div class="step" id="step-6">
+    <h2>6. Synthèse de l'entretien</h2>
+    <fieldset>
+      <label for="modeContact">Mode de contact (téléphone, visio...):</label>
+      <input type="text" id="modeContact" name="modeContact" placeholder="Ex: Téléphone">
+
+      <label for="presenceAccompagnant">Présence d'un accompagnant :</label>
+      <select id="presenceAccompagnant" name="presenceAccompagnant">
+        <option value="">--Sélectionnez--</option>
+        <option>Oui</option>
+        <option>Non</option>
+      </select>
+
+      <label for="orientationNecessaire">Orientation du patient nécessaire ?</label>
+      <select id="orientationNecessaire" name="orientationNecessaire">
+        <option value="">--Sélectionnez--</option>
+        <option>Oui</option>
+        <option>Non</option>
+      </select>
+
+      <label for="syntheseEntretien">Synthèse de l'entretien et durée :</label>
+      <textarea id="syntheseEntretien" name="syntheseEntretien" rows="3"></textarea>
+
+      <label for="appreciationNiveau">Appréciation sur le niveau de connaissance du patient :</label>
+      <textarea id="appreciationNiveau" name="appreciationNiveau" rows="2"></textarea>
+
+      <label for="remarques">Remarques et observations complémentaires :</label>
+      <textarea id="remarques" name="remarques" rows="2"></textarea>
+    </fieldset>
+
+    <div class="buttons">
+      <button type="button" id="prev-6" class="btn-secondary">Précédent</button>
+      <button type="button" id="submit-btn" class="btn-success">Soumettre l'entretien</button>
+    </div>
+  </div>
+
+  <!-- Message de confirmation -->
+  <div class="step" id="step-confirmation" style="text-align: center;">
+    <div class="success-message">
+      <h2>✓ Entretien soumis avec succès !</h2>
+      <p>Les données ont été enregistrées correctement.</p>
+      <button type="button" id="reset-btn" class="btn-primary">Nouvel entretien</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
