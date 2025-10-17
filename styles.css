@@ -363,3 +363,141 @@ input:valid:not(:placeholder-shown),
 select:valid:not(:placeholder-shown) {
   border-color: var(--success-color);
 }
+
+/* Styles pour la recherche de corticoïdes inhalés */
+.corticoide-search-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.corticoide-search {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: white;
+}
+
+.corticoide-search:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.corticoide-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-width: 500px;
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: -15px;
+}
+
+.corticoide-result-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--light-bg);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.corticoide-result-item:last-child {
+  border-bottom: none;
+}
+
+.corticoide-result-item:hover {
+  background: #f0f7ff;
+}
+
+.corticoide-result-item strong {
+  color: var(--secondary-color);
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.corticoide-result-item small {
+  color: #7f8c8d;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.corticoide-selection {
+  margin-top: 15px;
+}
+
+.selected-corticoide {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+.selected-corticoide strong {
+  font-size: 16px;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.selected-corticoide small {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.remove-selection {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-selection:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Scrollbar personnalisée pour les résultats */
+.corticoide-results::-webkit-scrollbar {
+  width: 8px;
+}
+
+.corticoide-results::-webkit-scrollbar-track {
+  background: var(--light-bg);
+  border-radius: 0 0 6px 0;
+}
+
+.corticoide-results::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.corticoide-results::-webkit-scrollbar-thumb:hover {
+  background: #2980b9;
+}

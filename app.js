@@ -6,18 +6,45 @@
 // Configuration de l'URL du webhook (à modifier selon votre backend)
 const WEBHOOK_URL = "https://votre-webhook-url.com/entretien"; // Remplacer par votre URL n8n ou Google Apps Script
 
+// Base de données des médicaments AOD avec dosages
+const medicamentsAOD = {
+  "Eliquis (Apixaban)": ["2,5 mg", "5 mg"],
+  "Xarelto (Rivaroxaban)": ["10 mg", "15 mg", "20 mg"],
+  "Pradaxa (Dabigatran)": ["75 mg", "110 mg", "150 mg"]
+};
+
+// Base de données des médicaments AVK avec dosages
+const medicamentsAVK = {
+  "Coumadine (Warfarine)": ["2 mg", "5 mg"],
+  "Sintrom (Acénocoumarol)": ["4 mg"],
+  "Mini-Sintrom (Acénocoumarol)": ["1 mg"],
+  "Previscan (Fluindione)": ["20 mg"]
+};
+
+// Base de données des corticoïdes inhalés avec dosages
+const corticoidesInhales = [
+  { nom: "Flixotide", dci: "Fluticasone propionate", dispositif: "MDI (Evohaler)", dosages: ["50", "125", "250"], source: "VIDAL" },
+  { nom: "Flixotide Diskus", dci: "Fluticasone propionate", dispositif: "DPI (Diskus)", dosages: ["100", "250", "500"], source: "VIDAL" },
+  { nom: "Pulmicort Turbuhaler", dci: "Budésonide", dispositif: "DPI (Turbuhaler)", dosages: ["100", "200", "400"], source: "VIDAL" },
+  { nom: "Alvesco", dci: "Ciclésonide", dispositif: "MDI", dosages: ["80", "160"], source: "Base de Données Médicaments" },
+  { nom: "Asmanex Twisthaler", dci: "Furoate de mométasone", dispositif: "DPI (Twisthaler)", dosages: ["200", "400"], source: "Base de Données Médicaments" },
+  { nom: "Bécotide", dci: "Béclométasone dipropionate", dispositif: "MDI", dosages: ["250"], source: "Base de Données Médicaments" },
+  { nom: "Beclometasone Teva", dci: "Béclométasone dipropionate", dispositif: "MDI", dosages: ["50", "250"], source: "Base de Données Médicaments" },
+  { nom: "QVAR Autohaler", dci: "Béclométasone dipropionate", dispositif: "MDI (autodéclenché)", dosages: ["100"], source: "Base de Données Médicaments" }
+];
+
 // Définition des questions d'évaluation pour chaque type d'entretien
 const evaluationQuestions = {
   aod: [
-    { q: "Quel anticoagulant oral direct prenez-vous ?", type: "text", id: "q_aod_medicament" },
-    { q: "Connaissez-vous la dose que vous prenez ?", type: "select", options: ["Oui", "Non"], id: "q_aod_connaitDose" },
-    { q: "Si oui, quelle dose ?", type: "text", id: "q_aod_dose" },
+    { q: "Quel anticoagulant oral direct prenez-vous ?", type: "select_medicament", medicaments: medicamentsAOD, id: "q_aod_medicament" },
+    { q: "Quelle dose prenez-vous ?", type: "select_dosage", id: "q_aod_dose", dependsOn: "q_aod_medicament" },
     { q: "Pour quelle raison prenez-vous ce traitement ?", type: "text", id: "q_aod_indication" },
     { q: "Depuis combien de temps prenez-vous ce traitement ?", type: "text", id: "q_aod_duree" },
     { q: "Connaissez-vous les effets indésirables possibles ?", type: "select", options: ["Oui", "Non"], id: "q_aod_effetsConnus" }
   ],
   avk: [
-    { q: "Quel anti-vitamine K prenez-vous ?", type: "text", id: "q_avk_medicament" },
+    { q: "Quel anti-vitamine K prenez-vous ?", type: "select_medicament", medicaments: medicamentsAVK, id: "q_avk_medicament" },
+    { q: "Quelle dose prenez-vous ?", type: "select_dosage", id: "q_avk_dose", dependsOn: "q_avk_medicament" },
     { q: "Quel est votre INR cible ?", type: "text", id: "q_avk_inrCible" },
     { q: "Quelle était votre dernière valeur d'INR ?", type: "text", id: "q_avk_dernierINR" },
     { q: "Date du dernier contrôle INR", type: "date", id: "q_avk_dateDernierINR" },
@@ -28,7 +55,7 @@ const evaluationQuestions = {
     { q: "Quel type d'asthme avez-vous ?", type: "text", id: "q_asthme_typeAsthme" },
     { q: "Depuis combien de temps êtes-vous asthmatique ?", type: "text", id: "q_asthme_duree" },
     { q: "Avez-vous un traitement de fond ?", type: "select", options: ["Oui", "Non"], id: "q_asthme_traitementFond" },
-    { q: "Si oui, quel(s) traitement(s) de fond ?", type: "text", id: "q_asthme_quelTraitementFond" },
+    { q: "Si oui, quel(s) traitement(s) de fond ?", type: "search_corticoide", medicaments: corticoidesInhales, id: "q_asthme_quelTraitementFond" },
     { q: "Avez-vous un traitement de crise ?", type: "select", options: ["Oui", "Non"], id: "q_asthme_traitementCrise" },
     { q: "Si oui, lequel ?", type: "text", id: "q_asthme_quelTraitementCrise" },
     { q: "Fréquence des crises d'asthme", type: "text", id: "q_asthme_frequenceCrises" }
@@ -217,7 +244,126 @@ function renderEvaluationQuestions(type) {
     container.appendChild(qLabel);
 
     let inputEl;
-    if (item.type === "select") {
+
+    // Sélection de médicament (AOD ou AVK)
+    if (item.type === "select_medicament") {
+      inputEl = document.createElement('select');
+      inputEl.id = item.id;
+      inputEl.name = item.id;
+      inputEl.innerHTML = '<option value="">--Sélectionnez un médicament--</option>';
+      Object.keys(item.medicaments).forEach(medName => {
+        const optEl = document.createElement('option');
+        optEl.value = medName;
+        optEl.textContent = medName;
+        inputEl.appendChild(optEl);
+      });
+    }
+    // Sélection de dosage (dépend du médicament sélectionné)
+    else if (item.type === "select_dosage") {
+      inputEl = document.createElement('select');
+      inputEl.id = item.id;
+      inputEl.name = item.id;
+      inputEl.innerHTML = '<option value="">--Sélectionnez d\'abord un médicament--</option>';
+      inputEl.disabled = true; // Désactivé par défaut
+    }
+    // Recherche de corticoïde inhalé avec barre de recherche
+    else if (item.type === "search_corticoide") {
+      // Créer un conteneur pour la recherche
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'corticoide-search-container';
+
+      // Barre de recherche
+      const searchInput = document.createElement('input');
+      searchInput.type = "text";
+      searchInput.id = item.id + '_search';
+      searchInput.placeholder = "Rechercher un corticoïde...";
+      searchInput.className = 'corticoide-search';
+
+      // Champ caché pour stocker la sélection
+      inputEl = document.createElement('input');
+      inputEl.type = "hidden";
+      inputEl.id = item.id;
+      inputEl.name = item.id;
+
+      // Liste déroulante des résultats
+      const resultsList = document.createElement('div');
+      resultsList.id = item.id + '_results';
+      resultsList.className = 'corticoide-results';
+      resultsList.style.display = 'none';
+
+      // Affichage de la sélection
+      const selectionDisplay = document.createElement('div');
+      selectionDisplay.id = item.id + '_display';
+      selectionDisplay.className = 'corticoide-selection';
+
+      searchContainer.appendChild(searchInput);
+      searchContainer.appendChild(resultsList);
+      searchContainer.appendChild(selectionDisplay);
+      searchContainer.appendChild(inputEl);
+
+      container.appendChild(searchContainer);
+
+      // Fonction de recherche
+      searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm.length < 2) {
+          resultsList.style.display = 'none';
+          return;
+        }
+
+        const filtered = item.medicaments.filter(med =>
+          med.nom.toLowerCase().includes(searchTerm) ||
+          med.dci.toLowerCase().includes(searchTerm) ||
+          med.dispositif.toLowerCase().includes(searchTerm)
+        );
+
+        if (filtered.length > 0) {
+          resultsList.innerHTML = '';
+          resultsList.style.display = 'block';
+
+          filtered.forEach(med => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'corticoide-result-item';
+            resultItem.innerHTML = `
+              <strong>${med.nom}</strong> - ${med.dci}<br>
+              <small>${med.dispositif} | Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}</small>
+            `;
+            resultItem.addEventListener('click', () => {
+              const selectedValue = JSON.stringify(med);
+              inputEl.value = selectedValue;
+              selectionDisplay.innerHTML = `
+                <div class="selected-corticoide">
+                  <strong>${med.nom}</strong> (${med.dci})<br>
+                  <small>${med.dispositif} - Dosages: ${med.dosages.map(d => d + ' µg').join(', ')}</small>
+                  <button type="button" class="remove-selection" style="margin-left:10px;">×</button>
+                </div>
+              `;
+              searchInput.value = '';
+              resultsList.style.display = 'none';
+
+              // Bouton pour supprimer la sélection
+              selectionDisplay.querySelector('.remove-selection').addEventListener('click', () => {
+                inputEl.value = '';
+                selectionDisplay.innerHTML = '';
+              });
+            });
+            resultsList.appendChild(resultItem);
+          });
+        } else {
+          resultsList.style.display = 'none';
+        }
+      });
+
+      // Cacher les résultats si on clique ailleurs
+      document.addEventListener('click', (e) => {
+        if (!searchContainer.contains(e.target)) {
+          resultsList.style.display = 'none';
+        }
+      });
+
+      return; // Pas besoin d'ajouter inputEl car déjà dans searchContainer
+    }
+    else if (item.type === "select") {
       inputEl = document.createElement('select');
       inputEl.id = item.id;
       inputEl.name = item.id;
@@ -240,6 +386,38 @@ function renderEvaluationQuestions(type) {
       inputEl.name = item.id;
     }
     container.appendChild(inputEl);
+  });
+
+  // Gérer la dépendance entre médicament et dosage
+  evaluationQuestions[type].forEach((item, idx) => {
+    if (item.type === "select_dosage" && item.dependsOn) {
+      const medicamentSelect = document.getElementById(item.dependsOn);
+      const dosageSelect = document.getElementById(item.id);
+
+      if (medicamentSelect && dosageSelect) {
+        medicamentSelect.addEventListener('change', () => {
+          const selectedMed = medicamentSelect.value;
+          dosageSelect.innerHTML = '<option value="">--Sélectionnez une dose--</option>';
+
+          if (selectedMed) {
+            const medicaments = type === 'aod' ? medicamentsAOD : medicamentsAVK;
+            const dosages = medicaments[selectedMed];
+
+            if (dosages) {
+              dosages.forEach(dosage => {
+                const optEl = document.createElement('option');
+                optEl.value = dosage;
+                optEl.textContent = dosage;
+                dosageSelect.appendChild(optEl);
+              });
+              dosageSelect.disabled = false;
+            }
+          } else {
+            dosageSelect.disabled = true;
+          }
+        });
+      }
+    }
   });
 
   // Gestion de l'affichage conditionnel des questions "Si oui..."
