@@ -11,16 +11,15 @@
 
 // Table de correspondance : ID client → URL webhook
 const CLIENT_WEBHOOKS = {
-  // ⚠️ REMPLACER LES URLs CI-DESSOUS PAR VOS VRAIES URLs DE WEBHOOK
-
-  "ouazanan": "https://script.google.com/macros/s/AKfycbxTL4ulOdQ1JOopLHvXA-p7JwV5a_vLkzhHwBXVfBzQAQ2V6iwvDx0rWGXJBtzUKcONhw/exec",
+  // Client Ouazanan - Pharmacie
+  "ouazanan": "https://script.google.com/macros/s/AKfycbyt6x4eFvRzGyd7XNkr4w4VYlRSY92WcX2HRjv0LoCp7wwPMSrie72Ca3SJw5BiHf26ew/exec",
 
   // Ajouter vos autres clients ici :
   // "martin": "https://script.google.com/macros/s/VOTRE_URL_CLIENT_2/exec",
   // "dupont": "https://script.google.com/macros/s/VOTRE_URL_CLIENT_3/exec",
 
   // Webhook par défaut (utilisé si aucun client spécifié)
-  "default": "https://script.google.com/macros/s/AKfycbxTL4ulOdQ1JOopLHvXA-p7JwV5a_vLkzhHwBXVfBzQAQ2V6iwvDx0rWGXJBtzUKcONhw/exec"
+  "default": "https://script.google.com/macros/s/AKfycbyt6x4eFvRzGyd7XNkr4w4VYlRSY92WcX2HRjv0LoCp7wwPMSrie72Ca3SJw5BiHf26ew/exec"
 };
 
 // Récupérer le paramètre "client" depuis l'URL (?client=ouazanan)
