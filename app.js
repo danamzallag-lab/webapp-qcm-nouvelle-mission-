@@ -11,15 +11,15 @@
 
 // Table de correspondance : ID client → URL webhook
 const CLIENT_WEBHOOKS = {
-  // Client Ouazanan - Pharmacie
-  "ouazanan": "https://script.google.com/macros/s/AKfycby1cDc2__zQDqtEcI2LOiklnpOb0SVSYbi92Guz0YrnDuN7tPqli1_et3XLvTXS_DPSjg/exec",
+  // Client Ouazanan - Pharmacie (avec proxy CORS)
+  "ouazanan": "https://corsproxy.io/?https://script.google.com/macros/s/AKfycby1cDc2__zQDqtEcI2LOiklnpOb0SVSYbi92Guz0YrnDuN7tPqli1_et3XLvTXS_DPSjg/exec",
 
   // Ajouter vos autres clients ici :
-  // "martin": "https://script.google.com/macros/s/VOTRE_URL_CLIENT_2/exec",
-  // "dupont": "https://script.google.com/macros/s/VOTRE_URL_CLIENT_3/exec",
+  // "martin": "https://corsproxy.io/?https://script.google.com/macros/s/VOTRE_URL_CLIENT_2/exec",
+  // "dupont": "https://corsproxy.io/?https://script.google.com/macros/s/VOTRE_URL_CLIENT_3/exec",
 
   // Webhook par défaut (utilisé si aucun client spécifié)
-  "default": "https://script.google.com/macros/s/AKfycby1cDc2__zQDqtEcI2LOiklnpOb0SVSYbi92Guz0YrnDuN7tPqli1_et3XLvTXS_DPSjg/exec"
+  "default": "https://corsproxy.io/?https://script.google.com/macros/s/AKfycby1cDc2__zQDqtEcI2LOiklnpOb0SVSYbi92Guz0YrnDuN7tPqli1_et3XLvTXS_DPSjg/exec"
 };
 
 // Récupérer le paramètre "client" depuis l'URL (?client=ouazanan)
