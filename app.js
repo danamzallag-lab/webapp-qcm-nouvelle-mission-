@@ -10,16 +10,17 @@
  */
 
 // Table de correspondance : ID client → URL webhook
+// Utiliser notre proxy interne Vercel pour éviter les problèmes CORS
 const CLIENT_WEBHOOKS = {
-  // Client Ouazanan - Pharmacie (avec proxy CORS)
-  "ouazanan": "https://corsproxy.io/?https://script.google.com/macros/s/AKfycby1cDc2__zQDqtEcI2LOiklnpOb0SVSYbi92Guz0YrnDuN7tPqli1_et3XLvTXS_DPSjg/exec",
+  // Client Ouazanan - Pharmacie (via proxy interne)
+  "ouazanan": "/api/webhook",
 
   // Ajouter vos autres clients ici :
-  // "martin": "https://corsproxy.io/?https://script.google.com/macros/s/VOTRE_URL_CLIENT_2/exec",
-  // "dupont": "https://corsproxy.io/?https://script.google.com/macros/s/VOTRE_URL_CLIENT_3/exec",
+  // "martin": "/api/webhook-martin",
+  // "dupont": "/api/webhook-dupont",
 
   // Webhook par défaut (utilisé si aucun client spécifié)
-  "default": "https://corsproxy.io/?https://script.google.com/macros/s/AKfycby1cDc2__zQDqtEcI2LOiklnpOb0SVSYbi92Guz0YrnDuN7tPqli1_et3XLvTXS_DPSjg/exec"
+  "default": "/api/webhook"
 };
 
 // Récupérer le paramètre "client" depuis l'URL (?client=ouazanan)
