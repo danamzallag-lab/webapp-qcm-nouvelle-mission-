@@ -3,8 +3,41 @@
  * Gestion multi-étapes avec validation et envoi des données
  */
 
-// Configuration de l'URL du webhook (à modifier selon votre backend)
-const WEBHOOK_URL = "https://votre-webhook-url.com/entretien"; // Remplacer par votre URL n8n ou Google Apps Script
+/**
+ * ========== CONFIGURATION MULTI-CLIENTS ==========
+ * Chaque client a son propre webhook Google Apps Script
+ * L'URL du client est déterminée par le paramètre ?client=XXX
+ */
+
+// Table de correspondance : ID client → URL webhook
+const CLIENT_WEBHOOKS = {
+  // ⚠️ REMPLACER LES URLs CI-DESSOUS PAR VOS VRAIES URLs DE WEBHOOK
+
+  "ouazanan": "https://script.google.com/macros/s/AKfycbxTL4ulOdQ1JOopLHvXA-p7JwV5a_vLkzhHwBXVfBzQAQ2V6iwvDx0rWGXJBtzUKcONhw/exec",
+
+  // Ajouter vos autres clients ici :
+  // "martin": "https://script.google.com/macros/s/VOTRE_URL_CLIENT_2/exec",
+  // "dupont": "https://script.google.com/macros/s/VOTRE_URL_CLIENT_3/exec",
+
+  // Webhook par défaut (utilisé si aucun client spécifié)
+  "default": "https://script.google.com/macros/s/AKfycbxTL4ulOdQ1JOopLHvXA-p7JwV5a_vLkzhHwBXVfBzQAQ2V6iwvDx0rWGXJBtzUKcONhw/exec"
+};
+
+// Récupérer le paramètre "client" depuis l'URL (?client=ouazanan)
+const urlParams = new URLSearchParams(window.location.search);
+const clientId = urlParams.get('client') || 'default';
+
+// Sélectionner le webhook correspondant au client
+const WEBHOOK_URL = CLIENT_WEBHOOKS[clientId] || CLIENT_WEBHOOKS['default'];
+
+// Logs pour le debug (visible dans la console du navigateur)
+console.log('🏥 Client actif :', clientId);
+console.log('🔗 Webhook configuré :', WEBHOOK_URL ? '✅ Oui' : '❌ Non');
+
+// Afficher un avertissement si le client n'est pas configuré
+if (!CLIENT_WEBHOOKS[clientId] && clientId !== 'default') {
+  console.warn('⚠️ ATTENTION : Client "' + clientId + '" non configuré ! Utilisation du webhook par défaut.');
+}
 
 // Base de données des médicaments AOD avec dosages
 const medicamentsAOD = {
@@ -747,10 +780,10 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     const data = collectFormData();
     console.log("Données collectées:", data);
 
-    // Envoi vers le webhook (décommenter et configurer l'URL)
-    // await sendToWebhook(data);
+    // Envoi vers le webhook
+    await sendToWebhook(data);
 
-    // Pour le moment, afficher la page de confirmation
+    // Afficher la page de confirmation
     showStep('confirmation');
     submitBtn.disabled = false;
     submitBtn.innerHTML = 'Soumettre l\'entretien';
